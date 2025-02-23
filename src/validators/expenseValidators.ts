@@ -17,7 +17,7 @@ const checkValidation: RequestHandler = (req, res, next) => {
 }
 
 export const validateExpenseId = [
-  param('id').isInt({ gt: 0 }).withMessage("ID must be a positive integer").toInt(),
+  param('id').isMongoId().withMessage("ID must be a valid mongo id"),
   checkValidation
 ];
 
