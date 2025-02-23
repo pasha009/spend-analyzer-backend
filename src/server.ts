@@ -32,6 +32,14 @@ const expenses = [
 
 let nextId = 3;
 
+app.use((req, res, next) => {
+  res.success = (msg, data = null, statusCode = 200) =>
+    res.status(statusCode).json({ success: true, msg, data, error: null });
+  res.error = (msg, error = null, statusCode = 500) =>
+    res.status(statusCode).json({ success: false, msg, data: null, error });
+  next();
+})
+
 const checkValidation: RequestHandler = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -44,36 +52,13 @@ const checkValidation: RequestHandler = (req, res, next) => {
     return;
   }
   req.sanitizedData = matchedData(req);
-  res.locals.sanitizedData = matchedData(req);
   next();
 }
 
 const validateExpenseId = [
-  param('id')
-    .isInt({ gt: 0 }).withMessage("ID must be a positive integer")
-    .toInt(),
+  param('id').isInt({ gt: 0 }).withMessage("ID must be a positive integer").toInt(),
   checkValidation
 ];
-
-app.get("/api/expense/:id", ...validateExpenseId, (req, res) => {
-  const expense = expenses.find(x => x.id === res.locals.sanitizedData.id);
-  if (expense) {
-    res.json({
-      success: true,
-      error: null,
-      data: expense,
-      msg: "Get Expense"
-    })
-  }
-  else {
-    res.json({
-      success: false,
-      error: "No expense found with specified id",
-      data: null,
-      msg: "Expense not found"
-    })
-  }
-});
 
 const validateCreateExpense = [
   body("amount").isFloat({ gt: 0 }).withMessage("Amount must be a positive number").toFloat(),
@@ -85,26 +70,57 @@ const validateCreateExpense = [
   checkValidation
 ];
 
-app.post("/api/expense/add", ...validateCreateExpense, (req, res) => {
+app.get("/expenses/", (req, res) => {
+  res.success("Get all expenses", expenses);
+});
+
+app.get("/expenses/:id", ...validateExpenseId, (req, res) => {
+  const expense = expenses.find(x => x.id === req.sanitizedData.id);
+  if (expense) {
+    return res.success("Get expense", expense);
+  }
+  res.error("Expense not found", "No expense found with specified id", 404);
+});
+
+app.post("/expenses/", ...validateCreateExpense, (req, res) => {
   const newExpense = {
     id: nextId,
-    amount: res.locals.sanitizedData.amount,
-    budget: res.locals.sanitizedData.budget,
-    category: res.locals.sanitizedData.category,
-    subcategory: res.locals.sanitizedData.subcategory ?? null,
-    title: res.locals.sanitizedData.title,
-    description: res.locals.sanitizedData.description ?? null,
+    amount: req.sanitizedData.amount,
+    budget: req.sanitizedData.budget,
+    category: req.sanitizedData.category,
+    subcategory: req.sanitizedData.subcategory ?? null,
+    title: req.sanitizedData.title,
+    description: req.sanitizedData.description ?? null,
     timestamp: Date.now()
   };
   expenses.push(newExpense);
-  res.json({
-    success: true,
-    error: null,
-    data: newExpense,
-    msg: "New Expense Created"
-  })
+  res.success("New expense created", newExpense);
   nextId++;
 });
+
+app.delete("/expenses/:id", ...validateExpenseId, (req, res) => {
+  const index = expenses.findIndex(x => x.id == req.sanitizedData.id);
+  if (index !== -1) {
+    expenses.splice(index, 1);
+    return res.success("Expense deleted", null);
+  }
+  res.error("Expense not found", null, 404);
+});
+
+app.put("/expenses/:id", ...validateExpenseId, ...validateCreateExpense, (req, res) => {
+  const index = expenses.findIndex(x => x.id == req.sanitizedData.id);
+  if (index !== -1) {
+    expenses[index].amount = req.sanitizedData.amount;
+    expenses[index].budget = req.sanitizedData.amount;
+    expenses[index].category = req.sanitizedData.amount;
+    expenses[index].subcategory = req.sanitizedData.amount ?? null;
+    expenses[index].title = req.sanitizedData.title;
+    expenses[index].description = req.sanitizedData.description;
+    return res.success("Expense updated successfully", expenses[index]);
+  }
+  res.error("Expense not found", null, 404);
+});
+
 
 const PORT = process.env.PORT ?? 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
