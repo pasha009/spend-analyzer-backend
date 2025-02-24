@@ -19,6 +19,7 @@ export const postExpense = async (req: Request, res: Response) => {
     title: req.sanitizedData.title,
     description: req.sanitizedData.description ?? null,
     amount: req.sanitizedData.amount,
+    budget: req.sanitizedData.budget,
     category: req.sanitizedData.category,
     subcategory: req.sanitizedData.subcategory ?? null,
   });
@@ -38,6 +39,7 @@ export const updateExpense = async (req: Request, res: Response) => {
     title: req.sanitizedData.title,
     description: req.sanitizedData.description ?? null,
     amount: req.sanitizedData.amount,
+    budget: req.sanitizedData.budget,
     category: req.sanitizedData.category,
     subcategory: req.sanitizedData.subcategory ?? null,
   }, { new: true, runValidators: true });

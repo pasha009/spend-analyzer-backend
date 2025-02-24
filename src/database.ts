@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 
-const connectDB = async () => {
+const connectDB = async (dbURI?: string) => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/spendAnalyzer", {
-    });
+    await mongoose.connect(dbURI ?? process.env.MONGO_URI!);
     console.log("MongoDB connected");
   } catch (error) {
     console.error("MongoDB connection error:", error);
