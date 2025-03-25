@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import Expense from "../models/expenseModel";
-import { ExpressValidator } from "express-validator";
 
 export const getExpense = async (req: Request, res: Response) => {
   const expense = await Expense.findById(req.sanitizedData.id);
@@ -50,12 +49,10 @@ export const updateExpense = async (req: Request, res: Response) => {
   res.error("Expense not found", null, 404);
 }
 
-
-// TODO: function to return all expenses within a following category
 export const getAllCategoryExpenses = async (req: Request, res: Response) =>{
   const expenses = await Expense.find({category : req.sanitizedData.category}).exec();
   if(expenses){
-    return res.success(`Expenses for category ${req.sanitizedData.category} found`,expenses);
+    return res.success(`Expenses for category ${req.sanitizedData.category} found`,expenses.map(x => x.toJSON()));
   }
   res.error("No such expenses found",null, 404);
 }

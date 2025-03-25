@@ -31,3 +31,7 @@ export const validateCreateExpense = [
   checkValidation
 ];
 
+export const validateCategoryExpense = [
+  body("category").isString().notEmpty().withMessage("Category must be a non-empty string")
+];
+

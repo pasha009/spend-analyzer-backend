@@ -37,4 +37,10 @@ router.put("/:id",
   controller.updateExpense
 );
 
+//TODO ; check if route is proper
+router.get("/category/:id",
+...validators.validateCategoryExpense,
+controller.getAllCategoryExpenses
+);
+
 export default router;
