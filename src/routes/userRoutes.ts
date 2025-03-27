@@ -23,4 +23,8 @@ router.post("/logout",
     controller.handleLogout
 );
 
+router.get("/refreshAccessToken",
+    controller.refreshHandler
+);
+
 export default router;

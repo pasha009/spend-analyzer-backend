@@ -37,10 +37,34 @@ router.put("/:id",
   controller.updateExpense
 );
 
-//TODO ; check if route is proper
 router.get("/category/:id",
 ...validators.validateCategoryExpense,
 controller.getAllCategoryExpenses
+);
+
+router.get("/budget/:id",
+...validators.validateBudgetExpense,
+controller.getAllPeriodExpenses
+);
+
+router.get("/subcategory/:id",
+...validators.validateSubCategoryExpense,
+controller.getAllSubCategoryExpenses
+);
+
+router.get("/period",
+...validators.validatePeriodExpense,
+controller.getAllPeriodExpenses
+);
+
+router.get("/price",
+...validators.validatePriceExpense,
+controller.getAllPriceExpenses
+);
+
+router.get("/latest/:id",
+...validators.validateLatestExpense,
+controller.getLatestExpenses
 );
 
 export default router;

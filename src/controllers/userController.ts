@@ -57,69 +57,40 @@ export const handleLogin = async(req:Request, res:Response) =>{
                 process.env.ACCESS_TOKEN_SECRET,
                 {expiresIn : '10m'}           
             );
-            
             usr.refreshToken=refreshToken;
             await usr.save();
-            res.cookie('jwt', refreshToken, {httpOnly: true, secure:true, maxAge: 24*60*60*1000});
-            return res.success("Logged in successfully", accessToken,200);
+            return res.success("Logged in successfully", {'accessToken': accessToken, 'refreshToken': refreshToken},200);
         }
         else{
-            return res.error(`Incorrect Password for username : ${user}`,401);
+            return res.error(`Incorrect Password for username : ${user}`,null,401);
         }
     }catch(err: any){
-        //server error 500
         return res.error(err.message, null, 500);
     }
 }
 
 export const handleLogout = async(req:Request, res:Response) =>{
-
-    const cookies= req.cookies;
-    if(!cookies?.jwt) return res.error("No Refresh Token present",204); //no content
-
-    const refreshToken = cookies.jwt;
-
-    jwt.verify(
-        refreshToken,
-        process.env.REFRESH_TOKEN_SECRET,
-        (err:any, decoded:any)=>{
-            if(!decoded.username){
-                return res.error("refreshToken not valid",400);
-            }
-            else{
-                res.clearCookie('jwt', {httpOnly : true});
-                return res.success(`Logged out user : ${decoded.username}`, 204);
-            }
-        }
-    );
-
+    const {refreshToken}= req.body;
+    if(!refreshToken) return res.error("No Refresh Token present",null,204); //no content
     const usr = await User.findOne({refreshToken:refreshToken}).exec();
-
-    //no user but cookie was there
     if(!usr){
-        res.clearCookie('jwt', {httpOnly : true, secure:true});
-        return res.success('jwt cookie cleared', 204);
+        return res.success("Logged out",null,204);
     }
-
     const result = await User.updateOne({refreshToken:refreshToken},{$unset: {refreshToken: refreshToken}});
-
-    res.clearCookie('jwt', {httpOnly : true}); //secure true- only serves on https
-    return res.success(`Logged out user : ${usr.username}`, 204);
-
+    return res.success("Logged out",null,204);
 }
 
 export const refreshHandler = async(req:Request, res:Response) =>{
-    const cookies= req.cookies;
-    if(!cookies?.jwt) return res.error("No Refresh Token present",204); //no content
+    const {refreshToken}= req.body;
 
-    const refreshToken = cookies.jwt;
+    if(!refreshToken) return res.error("No Refresh Token present",null,204); //no content
 
     jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET,
         (err:any, decoded:any)=>{
             if(!decoded.username){
-                return res.error("refreshToken not valid",400);
+                return res.error("refreshToken not valid",null,400);
             }
             else{
                 const accessToken = jwt.sign(
@@ -127,7 +98,7 @@ export const refreshHandler = async(req:Request, res:Response) =>{
                     process.env.ACCESS_TOKEN_SECRET,
                     {expiresIn : '10m'}           
                 );
-                return res.success("Logged in successfully", accessToken,200);                
+                return res.success("Access Token refreshed successfully", accessToken,200);                
             }
         }
     );   
@@ -138,15 +109,14 @@ export const verifyJWT = (req:Request, res:Response , next:any)=>{
 
     const authValue=(typeof(authHeader)!=="string")? '':authHeader;
 
-    if (!authValue.startsWith('Bearer ')) return res.error("Forbidden",401);
+    if (!authValue.startsWith('Bearer ')) return res.error("Forbidden",null,401);
     const token = authValue.split(' ')[1];
     jwt.verify(
         token,
         process.env.ACCESS_TOKEN_SECRET,
         (err:Error, decoded:any) => {
             if(err){
-                console.log("getting here?");
-                return res.sendStatus(403);
+                return res.error('Forbidden',null,403);
             }
             res.locals.user = decoded.UserInfo.username;
             next();

@@ -32,6 +32,33 @@ export const validateCreateExpense = [
 ];
 
 export const validateCategoryExpense = [
-  body("category").isString().notEmpty().withMessage("Category must be a non-empty string")
+  param('id').isString().notEmpty().withMessage("Category must be a non-empty string"),
+  checkValidation
 ];
 
+export const validateSubCategoryExpense = [
+  param('id').isString().notEmpty().withMessage("Sub-Category must be a non-empty string"),
+  checkValidation
+];
+
+export const validateBudgetExpense = [
+  param('id').isString().notEmpty().withMessage("Budget must be a non-empty string"),
+  checkValidation
+];
+
+export const validatePeriodExpense =[
+  body("startTime").isTime({}).withMessage("Start Time must be in proper timestamp format"),
+  body("endTime").isTime({}).withMessage("End Time must be in proper timestamp format"),
+  checkValidation
+];
+
+export const validatePriceExpense =[
+  body("floorAmount").isFloat({ gt: 0 }).withMessage("Flor Amount must be a float value").toFloat(),
+  body("ceilAmount").isFloat({ gt: 0 }).withMessage("Ceil Amount must be a float value").toFloat(),
+  checkValidation
+];
+
+export const validateLatestExpense =[
+  param('id').notEmpty().isNumeric().withMessage("Input id should be a number").toInt(),
+  checkValidation
+];

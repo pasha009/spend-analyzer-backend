@@ -4,9 +4,11 @@ import expenseRoutes from "./routes/expenseRoutes";
 import userRoutes from "./routes/userRoutes"
 import connectDB from "./database";
 
+const cookieParser = require('cookie-parser');
 dotenv.config();
 const app = express()
 app.use(express.json());
+app.use(cookieParser());
 app.use("/expenses", expenseRoutes);
 app.use("/users", userRoutes);
 
