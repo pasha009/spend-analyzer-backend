@@ -8,7 +8,7 @@ const expense = {
   description: "Test description",
   amount: 1000,
   budget: "Personal",
-  category: "Test category",
+  category: "Test Category",
   subcategory: "Test subcategory"
 }
 
@@ -27,6 +27,7 @@ const expectedKeys = [
 
 describe('Expense API tests', () => {
   let id: string;
+  let cat: string;
 
   beforeAll(async () => {
     await connectTestDB();
@@ -50,7 +51,10 @@ describe('Expense API tests', () => {
       expect(res.body.data[key]).toBe(expense[key as keyof typeof expense]);
     }
     expect(res.body.data._id).toBeTruthy();
+    expect(res.body.data.category).toBeTruthy();
+
     id = res.body.data._id;
+    cat = res.body.data.category;
   });
 
   it("should return created expenses on GET", async () => {
@@ -63,6 +67,17 @@ describe('Expense API tests', () => {
     }
     for (const key of expectedKeys) {
       expect(res.body.data).toHaveProperty(key);
+    }
+  });
+
+  it("should return category expenses on GET", async() =>{
+    expect(cat).toBeTruthy();
+    const res = await request(app).get(`/expenses/category/${cat}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    let catExpense = res.body.data;
+    for(const element of catExpense){
+      expect(element["category"]).toBe(cat);
     }
   });
 

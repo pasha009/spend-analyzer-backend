@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test vitest",
-    "dev": "npx ts-node --files src/server.ts"
+    "test": "NODE_ENV=test vitest --printConsoleTrace=true",
+    "dev": "npx ts-node --files src/server.ts",
+    "mon": "nodemon --files src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,10 +23,14 @@
     "vitest": "^3.0.6"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
-    "mongoose": "^8.10.1"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.10.1",
+    "nodemon": "^3.1.9"
   }
 }
