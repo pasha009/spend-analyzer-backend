@@ -1,23 +1,11 @@
+"use client";
+
 import React, {useEffect, useState} from "react";
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Expense Analyzer",
-  description: "Generated using Next js",
-};
-
 export default function Page(){
+
+  // const results = await fetch("http://localhost:3123/expenses");
+  // const data = await results.json();
+  // console.log(data);
 
   const [message, setMessage] = useState("Loading");
   useEffect( () =>{
@@ -27,10 +15,14 @@ export default function Page(){
       data => { 
         console.log(data);
         setMessage(JSON.stringify(data.data));
+      }).catch((error) => {
+        console.error("Error fetching expenses:", error);
+        setMessage("Failed to load data.");
       });
   }, []);
+
   return (
-    <div>{message}</div>
+    <div>{JSON.stringify(message)}</div>
   )
 }
 
