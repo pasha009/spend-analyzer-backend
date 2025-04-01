@@ -1,3 +1,4 @@
+"use client";
 import { LoginFormFieldProps } from "@/lib/types/loginTypes";
 
 const LoginFormField: React.FC<LoginFormFieldProps> = ({

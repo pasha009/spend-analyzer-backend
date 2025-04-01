@@ -1,7 +1,10 @@
-"use client";
-
-import React from "react";
+"use client"
+import React, { BaseSyntheticEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import SubmitButton from "@/components/SubmitButton";
+import RegFormField from "@/components/RegFormField";
+import { FormData } from "@/lib/types/regTypes";
+
 import axios from "axios";
 
 type RegFormData = {
@@ -16,11 +19,21 @@ const RegisterForm: React.FC = () => {
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<RegFormData>();
+  } = useForm<FormData>();
 
-  const onSubmit: SubmitHandler<RegFormData> = async (data) => {
+  const onSubmit: SubmitHandler<RegFormData> = async (data: RegFormData, event?: BaseSyntheticEvent) => {
+    event?.preventDefault();
+    console.log("le bhai");
+    if(data.password!==data.confirmPassword){
+      console.log("Passwords and Confirm Password fields should match");
+    }
+
+    const resData={
+      "user":data.username,
+      "pwd":data.password
+    }
     try {
-      const response = await axios.post("http://localhost:3123/users/register", data, {
+      const response = await axios.post("http://localhost:3123/users/register", resData, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -34,48 +47,40 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-md shadow-md max-w-sm mx-auto">
-      <div>
-        <label className="block text-sm font-semibold">Username</label>
-        <input
-          type="text"
-          {...register("username", { required: "Username is required" })}
-          className="border p-2 w-full rounded"
-        />
-        {errors.username && <p className="text-red-500 text-xs">{errors.username.message}</p>}
-      </div>
+    <div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+    <div className="grid col-auto max-w-5xl mx-auto px-5 flex justify-between items-center gap-4">
+          <h1 className="text-3xl font-bold mb-4">
+            User Registration
+          </h1>
+          <RegFormField
+            type="username"
+            placeholder="Username"
+            name="username"
+            register={register}
+            error={errors.username}
+          />
 
-      <div>
-        <label className="block text-sm font-semibold">Password</label>
-        <input
-          type="password"
-          {...register("password", { required: "Password is required", minLength: { value: 6, message: "Minimum 6 characters" } })}
-          className="border p-2 w-full rounded"
-        />
-        {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
-      </div>
+          <RegFormField
+            type="password"
+            placeholder="Password"
+            name="password"
+            register={register}
+            error={errors.password}
+          />
 
-      <div>
-        <label className="block text-sm font-semibold">Confirm Password</label>
-        <input
-          type="password"
-          {...register("confirmPassword", {
-            required: "Please confirm your password",
-            validate: (value) => value === watch("password") || "Passwords do not match",
-          })}
-          className="border p-2 w-full rounded"
-        />
-        {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>}
-      </div>
+          <RegFormField
+            type="password"
+            placeholder="Confirm Password"
+            name="confirmPassword"
+            register={register}
+            error={errors.confirmPassword}
+          />
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="bg-blue-500 text-white p-2 rounded w-full disabled:bg-gray-400"
-      >
-        {isSubmitting ? "Registering..." : "Register"}
-      </button>
+        <SubmitButton />
+      </div>
     </form>
+    </div>
   );
 };
 

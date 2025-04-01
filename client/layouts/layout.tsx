@@ -1,6 +1,5 @@
-"use client";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import {Header} from "@/components/Header";
+import {Footer} from "@/components/Footer";
 import { Geist, Geist_Mono } from "next/font/google";
 
 
@@ -13,18 +12,19 @@ const geistSans = Geist({
     variable: "--font-geist-mono",
     subsets: ["latin"],
   });
-
-export default function PageLayout (
-    {children}:{children: React.ReactNode}) {
+  
+  export default function PageLayout({
+    children,
+  }: Readonly<{
+    children: React.ReactNode;
+  }>){
     return(
-        <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
+        <div
+          className={`antialiased min-h-screen mt-8 mb-12`}
         >
           <Header />
           {children}
           <Footer />
-        </body>
-        </html>
+        </div>
     );
 }

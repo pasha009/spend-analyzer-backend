@@ -36,15 +36,15 @@ export const registerUser = async(req:Request, res:Response) =>{
 }
 
 export const handleLogin = async(req:Request, res:Response) =>{
-    const {user, pwd}= req.body;
-    if(!user || !pwd) res.error("Username and password are required", null, 400);
+    const {username, password}= req.body;
+    if(!username || !password) res.error("Username and password are required", null, 400);
 
-    const usr = await User.findOne({username : user}).exec();
+    const usr = await User.findOne({username : username}).exec();
 
-    if(!usr) return res.error(`No user found with username : ${user}`, null, 401);
+    if(!usr) return res.error(`No user found with username : ${username}`, null, 401);
 
     try{
-        const match = await bcrypt.compare(pwd, usr.password);
+        const match = await bcrypt.compare(password, usr.password);
         if(match){
             const refreshToken = jwt.sign(
                 {"username": usr.username},
@@ -62,7 +62,7 @@ export const handleLogin = async(req:Request, res:Response) =>{
             return res.success("Logged in successfully", {'accessToken': accessToken, 'refreshToken': refreshToken},200);
         }
         else{
-            return res.error(`Incorrect Password for username : ${user}`,null,401);
+            return res.error(`Incorrect Password for username : ${username}`,null,401);
         }
     }catch(err: any){
         return res.error(err.message, null, 500);

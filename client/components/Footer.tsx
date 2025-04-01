@@ -1,15 +1,11 @@
-const Footer = () =>{
-    return(
-        <footer className='bottom-0 mt-6 mb-8'>
-            <div className='max-w-5xl mx-auto px-5 flex justify-between items-center gap-4'>
-                <p className='text-sm'>
-                    Expense App &copy; {new Date().getFullYear()}
-                </p>
-                <div className='text-sm'>
-                    Created using Next.js
-                </div>
-            </div>
+// "use client";
+
+export const Footer = () => {
+    return (
+        <footer className="mt-12 py-4 text-center border-t">
+            <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} Expense App. All rights reserved.</p>
         </footer>
-    )
-}
-export default Footer;
+    );
+};
+
+
