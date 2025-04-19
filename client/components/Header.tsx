@@ -8,12 +8,15 @@ export const Header = () => {
                 <div className="font-bold">
                     <Link href="/">Expense App</Link>
                 </div>
-                <Link href="/login">
+                <div >
+                <Link href="/login" className='m-2'>
                     <Button>Sign In</Button>
                 </Link>
+                <Link href="/register">
+                    <Button>Sign Up</Button>
+                </Link> 
+                </div>
             </div>
         </div>
     );
 };
-
-

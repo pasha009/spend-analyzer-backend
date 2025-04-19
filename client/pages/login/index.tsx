@@ -16,19 +16,27 @@ function Form() {
     setError,
   } = useForm<FormData>();
 
+  const router = useRouter();
 
   const onSubmit:SubmitHandler<FormData> = async (data: FormData, event ?: BaseSyntheticEvent) => {
     event?.preventDefault();
     console.log(data);
-    // const router = useRouter();
     try {
       const response = await axios.post("http://localhost:3123/users/login", data, {
         headers: { "Content-Type": "application/json" },
       });
       console.log(response);
       alert("Sign In successful!");
-      // router.push('/');
       console.log("Server Response:", response.data);
+
+      const accessToken=response.data.data.accessToken;
+      const refreshToken=response.data.data.refreshToken;
+
+      console.log(accessToken);
+      console.log(refreshToken);
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      router.push('/');
     } catch (error: any) {
       console.error("Error:", error.response?.data || error.message);
       alert("Sign In failed. Please try again.");

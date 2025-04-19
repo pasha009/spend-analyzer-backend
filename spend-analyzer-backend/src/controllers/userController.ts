@@ -30,7 +30,6 @@ export const registerUser = async(req:Request, res:Response) =>{
         return res.success(`Created new user ${user}`,result,200);
     }catch(err: any) 
     {
-        //server error 500
         return res.error(err.message, null, 500);
     }
 }
@@ -51,7 +50,6 @@ export const handleLogin = async(req:Request, res:Response) =>{
                 process.env.REFRESH_TOKEN_SECRET,
                 {expiresIn : '1d'}           
             );
-
             const accessToken = jwt.sign(
                 {"username": usr.username},
                 process.env.ACCESS_TOKEN_SECRET,
@@ -59,7 +57,8 @@ export const handleLogin = async(req:Request, res:Response) =>{
             );
             usr.refreshToken=refreshToken;
             await usr.save();
-            return res.success("Logged in successfully", {'accessToken': accessToken, 'refreshToken': refreshToken},200);
+            res.cookie('jwt', refreshToken, {httpOnly: true, secure:true, maxAge: 24*60*60*1000});
+            return res.success("Logged in successfully", {'accessToken':accessToken,'refreshToken': refreshToken},200);
         }
         else{
             return res.error(`Incorrect Password for username : ${username}`,null,401);
@@ -76,7 +75,8 @@ export const handleLogout = async(req:Request, res:Response) =>{
     if(!usr){
         return res.success("Logged out",null,204);
     }
-    const result = await User.updateOne({refreshToken:refreshToken},{$unset: {refreshToken: refreshToken}});
+    await User.updateOne({refreshToken:refreshToken},{$unset: {refreshToken: refreshToken}});
+    res.clearCookie('jwt', {httpOnly : true}); //secure true- only serves on https
     return res.success("Logged out",null,204);
 }
 
@@ -98,7 +98,7 @@ export const refreshHandler = async(req:Request, res:Response) =>{
                     process.env.ACCESS_TOKEN_SECRET,
                     {expiresIn : '10m'}           
                 );
-                return res.success("Access Token refreshed successfully", accessToken,200);                
+                return res.success("Access Token refreshed successfully", {'accessToken':accessToken}, 200);                
             }
         }
     );   
@@ -109,14 +109,14 @@ export const verifyJWT = (req:Request, res:Response , next:any)=>{
 
     const authValue=(typeof(authHeader)!=="string")? '':authHeader;
 
-    if (!authValue.startsWith('Bearer ')) return res.error("Forbidden",null,401);
+    if (!authValue.startsWith('Bearer ')) return res.error("Forbidden : Authorisation Header shouldnt be empty and should start with beares",null,401);
     const token = authValue.split(' ')[1];
     jwt.verify(
         token,
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET,
         (err:Error, decoded:any) => {
             if(err){
-                return res.error('Forbidden',null,403);
+                return res.error('Forbidden',err,403);
             }
             res.locals.user = decoded.UserInfo.username;
             next();

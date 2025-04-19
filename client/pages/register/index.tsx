@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import SubmitButton from "@/components/SubmitButton";
 import RegFormField from "@/components/RegFormField";
 import { FormData } from "@/lib/types/regTypes";
+import {useRouter} from "next/navigation"
 
 import axios from "axios";
 
@@ -20,6 +21,8 @@ const RegisterForm: React.FC = () => {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>();
+
+  const router = useRouter();
 
   const onSubmit: SubmitHandler<RegFormData> = async (data: RegFormData, event?: BaseSyntheticEvent) => {
     event?.preventDefault();
@@ -40,6 +43,7 @@ const RegisterForm: React.FC = () => {
       console.log(response);
       alert("Registration successful!");
       console.log("Server Response:", response.data);
+      router.push('/login');
     } catch (error: any) {
       console.error("Error:", error.response?.data || error.message);
       alert("Registration failed. Please try again.");

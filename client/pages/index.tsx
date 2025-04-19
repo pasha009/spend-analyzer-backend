@@ -3,10 +3,6 @@ import React, { useEffect, useState } from "react";
 export default function Page() {
   const [message, setMessage] = useState<string | null>(null);
 
-  // const results = await fetch("http://localhost:3123/expenses");
-  // const data = await results.json();
-  // console.log(data);
-
   useEffect(() => {
     fetch("http://localhost:3123/expenses")
       .then((response) => response.json())
