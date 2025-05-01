@@ -7,12 +7,15 @@ import connectDB from "./database";
 var cors = require('cors')
 dotenv.config();
 const app = express()
+const cookieParser = require('cookie-parser');
 
 var corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:3123', 'http://127.0.0.1:3000', 'http://127.0.0.1:3123' ],
+  credentials: true,
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
+app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(express.json());
 

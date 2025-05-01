@@ -26,16 +26,14 @@ function Form() {
         headers: { "Content-Type": "application/json" },
       });
       console.log(response);
-      alert("Sign In successful!");
+      // alert("Sign In successful!");
       console.log("Server Response:", response.data);
 
       const accessToken=response.data.data.accessToken;
       const refreshToken=response.data.data.refreshToken;
-
-      console.log(accessToken);
-      console.log(refreshToken);
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
+      document.cookie = `refreshToken=${refreshToken}`;
       router.push('/');
     } catch (error: any) {
       console.error("Error:", error.response?.data || error.message);

@@ -30,11 +30,13 @@ router.post("/",
 );
 
 router.delete("/:id",
+  middleware.verifyJWT,
   ...validators.validateExpenseId,
   controller.deleteExpense
 );
 
 router.put("/:id",
+  middleware.verifyJWT,  
   ...validators.validateExpenseId,
   ...validators.validateCreateExpense,
   controller.updateExpense

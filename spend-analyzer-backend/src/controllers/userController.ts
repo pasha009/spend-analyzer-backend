@@ -12,6 +12,13 @@ import User from "../models/userModel"
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
+/**
+ * register a new user
+ * @param req  request object
+ * @param res  response object
+ * @returns 
+ */
 export const registerUser = async(req:Request, res:Response) =>{
     const {user, pwd}= req.body;
     if(!user || !pwd) return res.error("Username and password are required", null, 400);
@@ -34,6 +41,14 @@ export const registerUser = async(req:Request, res:Response) =>{
     }
 }
 
+/**
+ * handle user login
+ * @param req request object : format : {"username" : username, "password" : password}
+ * @param res response object
+ * @returns refresh token and access token both in data, refreshtoken in cookie
+ * @description : refresh token is stored in cookie, access token is sent in response
+ * @description : refresh token is used to get new access token, access token is used to access protected routes
+ */
 export const handleLogin = async(req:Request, res:Response) =>{
     const {username, password}= req.body;
     if(!username || !password) res.error("Username and password are required", null, 400);
@@ -53,7 +68,7 @@ export const handleLogin = async(req:Request, res:Response) =>{
             const accessToken = jwt.sign(
                 {"username": usr.username},
                 process.env.ACCESS_TOKEN_SECRET,
-                {expiresIn : '10m'}           
+                {expiresIn : '10sec'}           
             );
             usr.refreshToken=refreshToken;
             await usr.save();
@@ -68,6 +83,14 @@ export const handleLogin = async(req:Request, res:Response) =>{
     }
 }
 
+/**
+ * handle user logout
+ * @param req request object : format : {"refreshToken" : refreshToken}
+ * @param res response object
+ * @description : clears refresh token from cookie and removes refresh token from user model
+ * @returns 
+ */
+
 export const handleLogout = async(req:Request, res:Response) =>{
     const {refreshToken}= req.body;
     if(!refreshToken) return res.error("No Refresh Token present",null,204); //no content
@@ -80,10 +103,26 @@ export const handleLogout = async(req:Request, res:Response) =>{
     return res.success("Logged out",null,204);
 }
 
-export const refreshHandler = async(req:Request, res:Response) =>{
-    const {refreshToken}= req.body;
+/**
+ * refresh access token using refresh token
+ * @param req request object
+ * @param res response object
+ * @returns access token in response
+ * @description : refresh token is used to get new access token, access token is used to access protected routes
+ */
+export const refreshHandler = async(req:Request, res:Response) : Promise<any> =>{
+    console.log("Entering refresh handler");
+
+    const cookies= req.cookies;
+    console.log(cookies);
+    if(!cookies) return res.status(401).json({"message" : "cookies are required"});
+
+    const refreshToken = cookies.refreshToken;
 
     if(!refreshToken) return res.error("No Refresh Token present",null,204); //no content
+
+    const usr = await User.findOne({refreshToken: refreshToken}).exec();
+    if(!usr) return res.sendStatus(403); //forbidden
 
     jwt.verify(
         refreshToken,
@@ -91,6 +130,10 @@ export const refreshHandler = async(req:Request, res:Response) =>{
         (err:any, decoded:any)=>{
             if(!decoded.username){
                 return res.error("refreshToken not valid",null,400);
+            }
+            else if(err){
+                console.log(err);
+                return res.error("Forbidden",err,403);
             }
             else{
                 const accessToken = jwt.sign(
@@ -104,6 +147,14 @@ export const refreshHandler = async(req:Request, res:Response) =>{
     );   
 }
 
+/**
+ * verify JWT token
+ * @param req request object
+ * @param res response object
+ * @param next next function
+ * @description : verifies the JWT token and adds the user to the request object
+ * @returns 
+ */
 export const verifyJWT = (req:Request, res:Response , next:any)=>{
     const authHeader = req.headers.authorization || req.headers.Authorization;
 
@@ -113,12 +164,13 @@ export const verifyJWT = (req:Request, res:Response , next:any)=>{
     const token = authValue.split(' ')[1];
     jwt.verify(
         token,
-        process.env.REFRESH_TOKEN_SECRET,
+        process.env.ACCESS_TOKEN_SECRET,
         (err:Error, decoded:any) => {
             if(err){
+                console.log(err);
                 return res.error('Forbidden',err,403);
             }
-            res.locals.user = decoded.UserInfo.username;
+            res.locals.user = decoded.username;
             next();
         }
     );
