@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {authorize} from "@/utils/Authorize";
 import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from '@/utils/hooks';
+import { setUser, clearUser } from '../utils/store/userSlice';
+
 import { headers } from "next/headers";
 
 export default function Page() {
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();  
+  const dispatch = useAppDispatch();
 
   const fetchData = async () => {
       const authRes = await authorize();
@@ -16,6 +20,8 @@ export default function Page() {
       if(authRes.code===0){
         // console.log("Authorization failed returning to login");
         setMessage("Authorization failed returning to login");
+        localStorage.removeItem("user");
+        dispatch(clearUser());
         router.push('/login');
       }
       else if(authRes.code===1){

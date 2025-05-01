@@ -1,5 +1,4 @@
 import axios from "axios";
-import { headers } from "next/headers";
 
 export const authorize = async () : Promise<{authReq:any, code:number}> =>{
 
