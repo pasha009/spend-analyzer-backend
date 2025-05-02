@@ -26,7 +26,8 @@ export const verifyJWT = (req:Request, res:Response , next:any)=>{
                 console.log(err);
                 return res.error('Forbidden',token,403);
             }
-            res.locals.user = decoded.username;
+            res.locals.username = decoded.username;
+            res.locals.user_id = decoded.user_id;
             next();
         }
     );
