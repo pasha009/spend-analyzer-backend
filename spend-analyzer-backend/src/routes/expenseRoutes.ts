@@ -1,6 +1,7 @@
 import express from "express";
 import * as controller from "../controllers/expenseController";
 import * as validators from "../validators/expenseValidators";
+import * as middleware from "../middleware/auth";
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.use((req, res, next) => {
 })
 
 router.get("/",
+  middleware.verifyJWT,
   controller.getAllExpenses
 );
 
@@ -22,16 +24,19 @@ router.get("/:id",
 );
 
 router.post("/",
+  middleware.verifyJWT,
   ...validators.validateCreateExpense,
   controller.postExpense
 );
 
 router.delete("/:id",
+  middleware.verifyJWT,
   ...validators.validateExpenseId,
   controller.deleteExpense
 );
 
 router.put("/:id",
+  middleware.verifyJWT,  
   ...validators.validateExpenseId,
   ...validators.validateCreateExpense,
   controller.updateExpense

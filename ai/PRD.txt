@@ -1,0 +1,70 @@
+Product Requirements Document (PRD)
+
+1.⁠ ⁠Project Title
+
+Expense Tracker Web App
+
+2.⁠ ⁠Overview
+
+The Expense Tracker Web App is a simple and intuitive tool for users to log, categorize, and analyze their daily expenses and incomes. The goal is to help users understand their spending habits and improve personal financial management.
+
+3.⁠ ⁠Goals and Objectives
+	•	Allow users to track income and expenses.
+	•	Provide visualization of financial data (charts, summaries).
+	•	Enable users to filter and categorize transactions.
+	•	Support user authentication and data persistence.
+
+4.⁠ ⁠User Stories
+
+4.1 As a user, I want to:
+	•	Sign up and log in to access my data securely.
+	•	Add a new expense or income with a title, amount, category, and date.
+	•	View a list of all my transactions.
+	•	Edit or delete existing transactions.
+	•	View summary statistics (total income, total expenses, balance).
+	•	Visualize my spending trends over time using charts.
+	•	Filter transactions by category, date, or type.
+
+5.⁠ ⁠Features
+
+5.1 Authentication
+	•	Sign up, log in, and log out
+	•	Password hashing and secure storage
+
+5.2 Transaction Management
+	•	Add/Edit/Delete transactions
+	•	Support for categories: Food, Travel, Utilities, etc.
+	•	Date picker and amount field with validation
+
+5.3 Dashboard
+	•	Summary of total income, expenses, and current balance
+	•	Pie chart or bar graph of spending by category
+	•	Line chart of expenses over time
+
+5.4 Filters and Search
+	•	Date range filter
+	•	Category and type filter (income/expense)
+	•	Text search on description or title
+
+
+6. ⁠Technical Requirements
+
+Frontend:
+	•	Framework: React.js (or Next.js)
+	•	Styling: Tailwind CSS or Bootstrap
+	•	Charts: Chart.js or Recharts
+
+Backend:
+	•	Node.js with Express.js
+	•	Database: MongoDB or PostgreSQL
+	•	Authentication: JWT
+
+APIs:
+	•	RESTful API endpoints for auth and transaction CRUD
+
+7. ⁠Non-Functional Requirements
+	•	Responsive design (mobile and desktop)
+	•	Data security (encryption for sensitive data)
+	•	Performance optimization for large datasets
+	•	Accessible UI (keyboard navigation, screen readers)
+
