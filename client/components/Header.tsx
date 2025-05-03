@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 
 export const Header = () => {
     const user = useAppSelector((state) => state.user.user);
-    console.log("user", user);
     const dispatch = useAppDispatch();
 
     useEffect(() => {

@@ -4,6 +4,7 @@ import {authorize} from "@/utils/Authorize";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
 import { setUser, clearUser } from '../utils/store/userSlice';
+import Link from "next/link";
 
 import {
   Table,
@@ -84,7 +85,7 @@ export default function Page() {
 
       if(authRes.code===0){
         // console.log("Authorization failed returning to login");
-        setMessage("Authorization failed returning to login");
+        // setMessage("Authorization failed returning to login");
         localStorage.removeItem("user");
         dispatch(clearUser());
         router.push('/login');
@@ -149,12 +150,36 @@ export default function Page() {
             {/* todo: link these table rows to go to expense page on click */}
             {transactions.map((transaction) => (
               <TableRow key={transaction._id}>
-                <TableCell className="p-4">{new Date(transaction.updatedAt).toLocaleDateString()}</TableCell>
-                <TableCell className="text-left p-4">{transaction.title}</TableCell>
-                <TableCell className="text-left p-4">{transaction.description}</TableCell>
-                <TableCell className="text-center p-4">{transaction.amount}</TableCell>
-                <TableCell className="text-right p-4">{transaction.category}</TableCell>
-                <TableCell className="text-right p-4">{transaction.subcategory}</TableCell>
+                <TableCell className="p-4">
+                  <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
+                    {new Date(transaction.updatedAt).toLocaleDateString()}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-left p-4">
+                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
+                  {transaction.title}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-left p-4">
+                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
+                  {transaction.description}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-center p-4">
+                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
+                  {transaction.amount}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-right p-4">
+                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
+                  {transaction.category}
+                  </Link>
+                </TableCell>
+                <TableCell className="text-right p-4">
+                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
+                  {transaction.subcategory}
+                  </Link>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
