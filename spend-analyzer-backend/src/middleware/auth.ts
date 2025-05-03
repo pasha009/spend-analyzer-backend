@@ -17,7 +17,7 @@ export const verifyJWT = (req:Request, res:Response , next:any)=>{
 
     if (!authValue.startsWith('Bearer ')) return res.error("Forbidden : Authorisation Header shouldnt be empty and should start with beares",null,401);
     const token = authValue.split(' ')[1];
-    console.log(token);
+    // console.log(token);
     jwt.verify(
         token,
         process.env.ACCESS_TOKEN_SECRET,

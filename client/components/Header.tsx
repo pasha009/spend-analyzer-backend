@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { logout } from '@/utils/logoutHandler';
+import { CreateExpenseButton } from './createExpenseButton';
 
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
 import { setUser, clearUser } from '../utils/store/userSlice';
@@ -31,9 +32,12 @@ export const Header = () => {
                     <Link href="/">Expense App</Link>
                 </div>                
                 {user ? 
-                (<span>
+                (<div className='flex gap-4'>
+                    <CreateExpenseButton />
+                    <div className='flex items-center'>
                     <Button onClick={handleLogout}>Log Out</Button>
-                </span>):
+                    </div>
+                </div>):
                 (<div>
                     <Link href="/login" className='m-2'>
                         <Button>Log In</Button>
