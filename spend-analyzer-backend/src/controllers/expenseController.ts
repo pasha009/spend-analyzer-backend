@@ -22,7 +22,7 @@ export const getExpense = async (req: Request, res: Response) => {
  * @description : get all expenses for a user
  */
 export const getAllExpenses = async (req: Request, res: Response) => {
-  const expenses = await Expense.find({user_id: res.locals.user_id}).exec();
+  const expenses = await Expense.find({user_id: res.locals.user_id}).sort({updatedAt: -1}).exec();
   res.success("Get all expenses", expenses.map(x => x.toJSON()));
 }
 
@@ -71,6 +71,8 @@ export const deleteExpense = async (req: Request, res: Response) => {
  * @returns 
  */
 export const updateExpense = async (req: Request, res: Response) => {
+  console.log("entering here");
+  console.log(req.sanitizedData);
   const expense = await Expense.findOneAndUpdate({
     _id : req.sanitizedData.id,
     user_id: res.locals.user_id

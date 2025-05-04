@@ -66,13 +66,28 @@ export default function Page() {
     setSummary({expenses});
   };
 
+  let sum = 0;
+
+  //todo : fix line chart to show expenses with increasing time
+  const sumTransactions : Array<number > = [];
+  transactions.forEach((t: Transaction) => {
+    sum += t.amount;
+    sumTransactions.push(sum);
+  });
+
   const lineData = {
-    labels: transactions.map((t: Transaction) => new Date(t.updatedAt).toLocaleDateString()),
+    labels: transactions.map((t: Transaction) => t.updatedAt),
     datasets: [
       {
         label: 'Expenses Over Time',
         data: transactions.map((t) => t.amount),
         borderColor: 'rgb(184, 129, 17)',
+        fill: false,
+      },
+      {
+        label: 'Total Expenditure Over Time',
+        data: sumTransactions.map((t) => t),
+        borderColor: 'rgb(5, 111, 63)',
         fill: false,
       },
     ],

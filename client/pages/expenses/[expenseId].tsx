@@ -11,6 +11,7 @@ interface Transaction {
     title: string;
     amount: number;
     category: string;
+    budget: string;
     subcategory: string;
     description: string;
     updatedAt: string;
@@ -72,12 +73,61 @@ export default function ExpensePage({expenseId} : {expenseId: string}) {
                 <h1 className="text-xl font-semibold">Expense Details</h1>
                     <h2>Title: {transaction.title}</h2>
                     <p>Amount: {transaction.amount}</p>
+                    <p>Budget: {transaction.budget}</p>
                     <p>Category: {transaction.category}</p>
                     <p>Subcategory: {transaction.subcategory}</p>
                     <p>Description: {transaction.description}</p>
                     <p>Updated At: {new Date(transaction.updatedAt).toLocaleDateString()}</p>
                 </div>
             ))}
+            <div className="flex justify-between">
+                <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={() => {
+                        const queryParams = new URLSearchParams({
+                            id: transactions[0]._id,
+                            title: transactions[0].title,
+                            amount: transactions[0].amount.toString(),
+                            description: transactions[0].description,
+                            budget: transactions[0].budget,
+                            category: transactions[0].category,
+                            subcategory: transactions[0].subcategory
+                        });
+                        router.push(`/expenses/${expenseId}/edit?${queryParams.toString()}`);
+                    }}
+                >
+                    Edit
+                </button>
+                <button
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                    onClick={ async () => {
+                        await fetch(`http://localhost:3123/expenses/${expenseId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                            }
+                        })
+                        .then((response) => {
+                            console.log("Response:", response);
+                            if (response.ok) {
+                                alert("Expense deleted successfully");
+                                router.push('/');
+                            } else {
+                                //this might happen in case of access token expiry
+                                //todo : handle this later
+                                console.error("Failed to delete expense, try Again");
+                                router.push(`/expenses/${expenseId}`);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error deleting expense:", error);
+                        })
+                    }}
+                >
+                    Delete
+                </button>
+                </div>
         </div>
     );
 }

@@ -1,34 +1,63 @@
-import React, { useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import SubmitButton from "@/components/SubmitButton";
-import { FormData } from "@/lib/types/expenseTypes";
-import ExpenseFormField from "@/components/newExpenseFormField";
-import {useRouter} from "next/navigation";
-import { useAppDispatch } from '@/utils/hooks';
 import {authorize} from "@/utils/Authorize";
-import { setUser, clearUser } from '../utils/store/userSlice';
+import React, { useEffect } from "react";
+import { useAppDispatch } from '@/utils/hooks';
+import { clearUser } from '@/utils/store/userSlice';
+import { useRouter, useSearchParams } from "next/navigation";
+import UpdateButton from "@/components/UpdateButton";
+import { useForm, SubmitHandler } from "react-hook-form";
+import ExpenseFormField from "@/components/newExpenseFormField";
+import { FormData } from "@/lib/types/expenseTypes";
 import axios from "axios";
 
-type ExpenseFormData = {
-  title: string;
-  amount: number;
-  description: string;
-  budget: string;
-  category: string;
-  subcategory: string;
-};
 
-const ExpenseForm: React.FC = () =>{
+interface Transaction {
+    _id: string;
+    userId: string;
+    title: string;
+    amount: number;
+    category: string;
+    subcategory: string;
+    description: string;
+    updatedAt: string;
+  }
+
+  type ExpenseFormData = {
+    title: string;
+    amount: number;
+    description: string;
+    budget: string;
+    category: string;
+    subcategory: string;
+  };
+
+  const EditExpenseForm: React.FC = () =>{
+    const dispatch = useAppDispatch();
+    const router = useRouter();
+    let authRes = {authReq:{}, code:0};
+
+    const searchParams = useSearchParams();
+    if(!searchParams){
+        //todo : handle case where user directly inputs url with expenseId and doesnot go to it via edit button in expense page
+        console.log("Direct url call, no search params passed");
+        router.push('/');
+    }
+    const expenseId = searchParams.get("id");
     const {
         register,
         handleSubmit,
         watch,
         formState: { errors, isSubmitting },
-    } = useForm<FormData>();
+    } = useForm<FormData>({
+        defaultValues: {
+            title: searchParams.get("title") || "",
+            amount: parseFloat(searchParams.get("amount") || "0"),
+            description: searchParams.get("description") || "",
+            budget: searchParams.get("budget") || "",
+            category: searchParams.get("category") || "",
+            subcategory: searchParams.get("subcategory") || "",
+        }
+    });
 
-    const dispatch = useAppDispatch();
-    const router = useRouter();
-    let authRes = {authReq:{}, code:0};
 
     const fetchData = async() =>{
         authRes = await authorize();
@@ -44,10 +73,12 @@ const ExpenseForm: React.FC = () =>{
     useEffect(() => {
         fetchData();
     }, []);
- 
+
+
     const onSubmit: SubmitHandler<FormData> = async (data: ExpenseFormData, event?: React.BaseSyntheticEvent) => {
         if(authRes.code===1){
             const accessToken = localStorage.getItem("accessToken");
+            console.log("Expense ID:", expenseId);
             event?.preventDefault();
             const resData = {
                 title: data.title,
@@ -57,24 +88,25 @@ const ExpenseForm: React.FC = () =>{
                 category: data.category,
                 subcategory: data.subcategory
             };
+            console.log(resData);
             console.log(authRes.authReq);
             try{
-                const response = await axios.post("http://localhost:3123/expenses/", resData, {
+                const response = await axios.put(`http://localhost:3123/expenses/${expenseId}`, resData, {
                     headers: { "Content-Type": "application/json" 
                     , "Authorization": `Bearer ${accessToken}`
                     //look into why authRes.authReq.headers.Authorization is not working
                     // , "Authorization": `Bearer ${authRes.authReq.headers.Authorization}`
                 },
                 });
-                alert("Expense created successfully!");
+                alert("Expense updated successfully!");
                 console.log("Server Response:", response.data);
-                router.push('/');
+                router.push(`/expenses/${expenseId}`);
             }catch (error: any) {
                 //no way of handling access token expiry
                 //todo : find a way to handle access token expiry on the client side
                 console.error("Error:", error.response?.data || error.message);
-                alert("Expense creation failed. Please try again.");
-                router.push('/login');
+                alert("Expense updatation failed. Please try again.");
+                router.push('/');
             }
         }
     };
@@ -129,12 +161,27 @@ const ExpenseForm: React.FC = () =>{
                         register={register}
                         error={errors.subcategory}
                     />
-                <SubmitButton />
+                <UpdateButton />
                 </div>
             </form>
         </div>
     );
 }
 
+// Fetch data on the server side
+export async function getServerSideProps(context: any) {
+    const { expenseId } = context.params;
 
-export default ExpenseForm;
+    if (!expenseId) {
+        return {
+            notFound: true,
+        };
+    }
+    return {
+        props: {
+            expenseId,
+        },
+    };
+}
+
+export default EditExpenseForm;
