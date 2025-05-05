@@ -3,15 +3,14 @@ import User from "../models/userModel"
 
 /**
  * Todo things:
- * review login process 
- * refresh token shouldnt be stored in user model, directly decode it while handling logout, in auth controller as well
+ * review login process : done
+ * refresh token shouldnt be stored in user model, directly decode it while handling logout, in auth controller as well :done
  * access token to be added : Added
  * add authcontroller as well : added
  */
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
 
 /**
  * register a new user
@@ -61,14 +60,18 @@ export const handleLogin = async(req:Request, res:Response) =>{
         const match = await bcrypt.compare(password, usr.password);
         if(match){
             const refreshToken = jwt.sign(
-                {"username": usr.username},
+                {   "username": usr.username,
+                    "user_id": usr._id
+                },
                 process.env.REFRESH_TOKEN_SECRET,
                 {expiresIn : '1d'}           
             );
             const accessToken = jwt.sign(
-                {"username": usr.username},
+                {   "username": usr.username,
+                    "user_id": usr._id
+                },
                 process.env.ACCESS_TOKEN_SECRET,
-                {expiresIn : '10sec'}           
+                {expiresIn : '30min'}           
             );
             usr.refreshToken=refreshToken;
             await usr.save();
@@ -137,9 +140,11 @@ export const refreshHandler = async(req:Request, res:Response) : Promise<any> =>
             }
             else{
                 const accessToken = jwt.sign(
-                    {"username": decoded.username},
+                    {   "username": usr.username,
+                        "user_id": usr._id
+                    },
                     process.env.ACCESS_TOKEN_SECRET,
-                    {expiresIn : '10m'}           
+                    {expiresIn : '30m'}           
                 );
                 return res.success("Access Token refreshed successfully", {'accessToken':accessToken}, 200);                
             }
@@ -170,7 +175,8 @@ export const verifyJWT = (req:Request, res:Response , next:any)=>{
                 console.log(err);
                 return res.error('Forbidden',err,403);
             }
-            res.locals.user = decoded.username;
+            res.locals.username = decoded.username;
+            res.locals.user_id = decoded.user_id;
             next();
         }
     );

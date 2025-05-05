@@ -26,7 +26,7 @@ const RegisterForm: React.FC = () => {
 
   const onSubmit: SubmitHandler<RegFormData> = async (data: RegFormData, event?: BaseSyntheticEvent) => {
     event?.preventDefault();
-    console.log("le bhai");
+    // console.log("le bhai");
     if(data.password!==data.confirmPassword){
       console.log("Passwords and Confirm Password fields should match");
     }

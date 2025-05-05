@@ -13,8 +13,9 @@ router.use((req, res, next) => {
   next();
 })
 
+router.use(middleware.verifyJWT);
+
 router.get("/",
-  middleware.verifyJWT,
   controller.getAllExpenses
 );
 
@@ -24,19 +25,16 @@ router.get("/:id",
 );
 
 router.post("/",
-  middleware.verifyJWT,
   ...validators.validateCreateExpense,
   controller.postExpense
 );
 
 router.delete("/:id",
-  middleware.verifyJWT,
   ...validators.validateExpenseId,
   controller.deleteExpense
 );
 
 router.put("/:id",
-  middleware.verifyJWT,  
   ...validators.validateExpenseId,
   ...validators.validateCreateExpense,
   controller.updateExpense
