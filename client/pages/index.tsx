@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {authorize} from "@/utils/Authorize";
+import { authorize } from "@/utils/Authorize";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
 import { setUser, clearUser } from '../utils/store/userSlice';
@@ -14,8 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-
+} from "@/components/ui/table";
 
 import { Pie, Line } from 'react-chartjs-2';
 import {
@@ -41,6 +40,18 @@ ChartJS.register(
   Title
 );
 
+/**
+ * Represents a single transaction record.
+ * 
+ * @property {string} _id - The unique identifier for the transaction.
+ * @property {string} userId - The ID of the user associated with the transaction.
+ * @property {string} title - The title or name of the transaction.
+ * @property {number} amount - The monetary amount of the transaction.
+ * @property {string} category - The category under which the transaction falls.
+ * @property {string} subcategory - The subcategory under which the transaction falls.
+ * @property {string} description - A brief description of the transaction.
+ * @property {string} updatedAt - The timestamp of the last update to the transaction.
+ */
 interface Transaction {
   _id: string;
   userId: string;
@@ -52,24 +63,29 @@ interface Transaction {
   updatedAt: string;
 }
 
+/**
+ * The main page component that displays a summary of expenses, a line chart
+ * showing expenses over time, and a table of recent transactions.
+ * 
+ * @returns {JSX.Element} The rendered page component.
+ */
 export default function Page() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [summary, setSummary] = useState({ expenses: 0});
+  const [summary, setSummary] = useState({ expenses: 0 });
 
   const [message, setMessage] = useState<string | null>(null);
-  const router = useRouter();  
+  const router = useRouter();
   const dispatch = useAppDispatch();
 
   const calculateSummary = (data: Transaction[]) => {
-    const expenses = data
-      .reduce((sum: number, t: Transaction) => sum + t.amount, 0);
-    setSummary({expenses});
+    const expenses = data.reduce((sum: number, t: Transaction) => sum + t.amount, 0);
+    setSummary({ expenses });
   };
 
   let sum = 0;
 
-  //todo : fix line chart to show expenses with increasing time
-  const sumTransactions : Array<number > = [];
+  // todo : fix line chart to show expenses with increasing time
+  const sumTransactions: Array<number> = [];
   transactions.forEach((t: Transaction) => {
     sum += t.amount;
     sumTransactions.push(sum);
@@ -94,28 +110,25 @@ export default function Page() {
   };
 
   const fetchData = async () => {
-      const authRes = await authorize();
-      console.log(authRes.authReq); // Access the resolved object
-      console.log(authRes.code);
+    const authRes = await authorize();
+    console.log(authRes.authReq); // Access the resolved object
+    console.log(authRes.code);
 
-      if(authRes.code===0){
-        // console.log("Authorization failed returning to login");
-        // setMessage("Authorization failed returning to login");
-        localStorage.removeItem("user");
-        dispatch(clearUser());
-        router.push('/login');
-      }
-      else if(authRes.code===1){
-        console.log("Access token present");
+    if (authRes.code === 0) {
+      // console.log("Authorization failed returning to login");
+      localStorage.removeItem("user");
+      dispatch(clearUser());
+      router.push('/login');
+    } else if (authRes.code === 1) {
+      console.log("Access token present");
 
-        const response = await fetch("http://localhost:3123/expenses", {
-            headers: authRes.authReq.headers
-          });
-        if (!response.ok) {
-          localStorage.removeItem("accessToken");
-          router.push('/');
-        }
-        else{
+      const response = await fetch("http://localhost:3123/expenses", {
+        headers: authRes.authReq.headers
+      });
+      if (!response.ok) {
+        localStorage.removeItem("accessToken");
+        router.push('/');
+      } else {
         console.log("Response:", response.json().then((data) => {
           console.log("Fetch Data:", data.data);
           setTransactions(data.data);
@@ -123,9 +136,9 @@ export default function Page() {
           // console.log("transactions:", transactions);
           // setMessage(JSON.stringify(data.data));
         }));
-        }
-        console.log("Data pulled in");        
       }
+      console.log("Data pulled in");
+    }
   };
 
   useEffect(() => {
@@ -136,23 +149,23 @@ export default function Page() {
     return <div>Loading...</div>;
   }
 
-  return(
+  return (
     <div>
-        <div className="max-w-5xl mx-auto px-5 flex justify-between items-center gap-4">
-            <p className="text-lg">Here is a summary of your expenses:</p>
-              <p className="text-xl font-bold mb-2">Total Expenses: {summary.expenses}</p>
-        </div>
-        <div className='max-w-5xl mx-auto px-5 flex justify-between items-center gap-4'>    
-              {/* todo:  add pie chart */}
-              {/* todo: fix chart going out of bounds issue */}
-          <h2 className="text-xl font-bold mb-2">Expenses Over Time</h2>
-          <Line data={lineData} />
-        </div>
-        <div className='max-w-5xl mx-auto px-5 flex justify-between items-center gap-4'>          
-          <Table>
+      <div className="max-w-5xl mx-auto px-5 flex justify-between items-center gap-4">
+        <p className="text-lg">Here is a summary of your expenses:</p>
+        <p className="text-xl font-bold mb-2">Total Expenses: {summary.expenses}</p>
+      </div>
+      <div className='max-w-5xl mx-auto px-5 flex justify-between items-center gap-4'>
+        {/* todo:  add pie chart */}
+        {/* todo: fix chart going out of bounds issue */}
+        <h2 className="text-xl font-bold mb-2">Expenses Over Time</h2>
+        <Line data={lineData} />
+      </div>
+      <div className='max-w-5xl mx-auto px-5 flex justify-between items-center gap-4'>
+        <Table>
           <TableCaption>A list of your recent expenses.</TableCaption>
           <TableHeader>
-              <TableRow>
+            <TableRow>
               <TableHead className="w-[100px] p-4">Date</TableHead>
               <TableHead className="text-left p-4">Title</TableHead>
               <TableHead className="text-left p-4">Description</TableHead>
@@ -166,40 +179,40 @@ export default function Page() {
             {transactions.map((transaction) => (
               <TableRow key={transaction._id}>
                 <TableCell className="p-4">
-                  <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
+                  <Link className="block p-4" href={`/expenses/${transaction._id}`}>
                     {new Date(transaction.updatedAt).toLocaleDateString()}
                   </Link>
                 </TableCell>
                 <TableCell className="text-left p-4">
-                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
-                  {transaction.title}
+                  <Link className="block p-4" href={`/expenses/${transaction._id}`}>
+                    {transaction.title}
                   </Link>
                 </TableCell>
                 <TableCell className="text-left p-4">
-                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
-                  {transaction.description}
+                  <Link className="block p-4" href={`/expenses/${transaction._id}`}>
+                    {transaction.description}
                   </Link>
                 </TableCell>
                 <TableCell className="text-center p-4">
-                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
-                  {transaction.amount}
+                  <Link className="block p-4" href={`/expenses/${transaction._id}`}>
+                    {transaction.amount}
                   </Link>
                 </TableCell>
                 <TableCell className="text-right p-4">
-                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
-                  {transaction.category}
+                  <Link className="block p-4" href={`/expenses/${transaction._id}`}>
+                    {transaction.category}
                   </Link>
                 </TableCell>
                 <TableCell className="text-right p-4">
-                <Link className=" block p-4" href={`/expenses/${transaction._id}`}>
-                  {transaction.subcategory}
+                  <Link className="block p-4" href={`/expenses/${transaction._id}`}>
+                    {transaction.subcategory}
                   </Link>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-          </Table>
+        </Table>
       </div>
     </div>
-    );
+  );
 }

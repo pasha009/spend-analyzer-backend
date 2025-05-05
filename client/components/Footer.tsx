@@ -1,5 +1,9 @@
 // "use client";
 
+/**
+ * Footer component for the application.
+ * @returns {JSX.Element} The rendered footer component.
+ */
 export const Footer = () => {
     return (
         <footer className="mt-12 py-4 text-center border-t">
